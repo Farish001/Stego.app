@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Stego.app</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+body{
+    background: linear-gradient(135deg,#0f2027,#203a43,#2c5364);
+    color:white;
+    padding:30px;
+}
+
+h1{
+    text-align:center;
+    margin-bottom:40px;
+    font-weight:600;
+    letter-spacing:1px;
+}
+
+.section{
+    background: rgba(255,255,255,0.06);
+    padding:25px;
+    border-radius:14px;
+    margin-bottom:35px;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+    transition:0.3s;
+}
+
+.section:hover{
+    transform:translateY(-3px);
+}
+
+.section h2{
+    margin-bottom:20px;
+    font-size:20px;
+    font-weight:500;
+}
+
+input[type="file"],
+textarea{
+    width:100%;
+    padding:10px;
+    margin-bottom:15px;
+    border-radius:8px;
+    border:none;
+    outline:none;
+}
+
+textarea{
+    resize:none;
+    height:100px;
+}
+
+.password-wrapper{
+    position:relative;
+    width:100%;
+    max-width:320px;
+    margin-bottom:15px;
+}
+
+.password-wrapper input{
+    width:100%;
+    padding:10px 38px 10px 10px;
+    border-radius:8px;
+    border:none;
+    outline:none;
+}
+
+.eye-icon{
+    position:absolute;
+    right:10px;
+    top:50%;
+    transform:translateY(-50%);
+    width:16px;
+    height:16px;
+    cursor:pointer;
+    fill:black;
+    opacity:0.7;
+}
+
+.eye-icon:hover{
+    opacity:1;
+}
+
+button{
+    padding:8px 18px;
+    margin-right:10px;
+    margin-top:5px;
+    border:none;
+    border-radius:8px;
+    cursor:pointer;
+    background:#00c6ff;
+    color:black;
+    font-weight:500;
+    transition:0.3s;
+}
+
+button:hover{
+    background:#00e0ff;
+}
+
+.output-box{
+    margin-top:15px;
+    background:rgba(0,0,0,0.3);
+    padding:10px;
+    border-radius:8px;
+    min-height:40px;
+}
+
+canvas{
+    display:none;
+}
+</style>
+</head>
+
+<body>
+
+<h1>Stego.app</h1>
+
+<!-- Image Encode -->
+<div class="section">
+<h2>Image Encode</h2>
+
+<input type="file" id="encodeImageInput" accept="image/png,image/jpeg">
+<textarea id="encodeMessage" placeholder="Enter message to hide"></textarea>
+
+<div class="password-wrapper">
+<input type="password" id="encodePassword" placeholder="Password">
+<svg class="eye-icon" onclick="togglePassword('encodePassword')" viewBox="0 0 24 24">
+<path d="M12 5c-7 0-11 7-11 7s4 7 11 7 11-7 11-7-4-7-11-7zm0 12a5 5 0 1 1 0-10 5 5 0 0 1 0 10z"/>
+</svg>
+</div>
+
+<button onclick="encodeImage()">Encode</button>
+<button onclick="downloadEncodedImage()">Download</button>
+<button onclick="clearImageEncode()">Clear</button>
+
+</div>
+
+
+<!-- Image Decode -->
+<div class="section">
+<h2>Image Decode</h2>
+
+<input type="file" id="decodeImageInput" accept="image/png,image/jpeg">
+
+<div class="password-wrapper">
+<input type="password" id="decodePassword" placeholder="Password">
+<svg class="eye-icon" onclick="togglePassword('decodePassword')" viewBox="0 0 24 24">
+<path d="M12 5c-7 0-11 7-11 7s4 7 11 7 11-7 11-7-4-7-11-7zm0 12a5 5 0 1 1 0-10 5 5 0 0 1 0 10z"/>
+</svg>
+</div>
+<button onclick="decodeImage()">Decode</button>
+<button onclick="clearImageDecode()">Clear</button>
+<div class="output-box" id="decodedMessage"></div>
+</div>
+
+<!-- Create PDF & Encode -->
+<div class="section">
+<h2>Create PDF & Encode</h2>
+
+<textarea id="pdfText" placeholder="Enter text for PDF"></textarea>
+<input type="file" id="pdfImageInput" accept="image/png,image/jpeg">
+
+<div class="password-wrapper">
+<input type="password" id="pdfCreatePassword" placeholder="Password">
+<svg class="eye-icon" onclick="togglePassword('pdfCreatePassword')" viewBox="0 0 24 24">
+<path d="M12 5c-7 0-11 7-11 7s4 7 11 7 11-7 11-7-4-7-11-7zm0 12a5 5 0 1 1 0-10 5 5 0 0 1 0 10z"/>
+</svg>
+</div>
+<button onclick="createAndEncryptPDF()">Create & Encrypt</button>
+<button onclick="downloadEncodedPDF()">Download</button>
+<button onclick="clearCreatePDF()">Clear</button>
+</div>
+
+<!-- Upload PDF & Encode -->
+<div class="section">
+<h2>Upload PDF & Encode</h2>
+
+<input type="file" id="uploadPDFInput" accept="application/pdf">
+<div class="password-wrapper">
+<input type="password" id="uploadPDFPassword" placeholder="Password">
+<svg class="eye-icon" onclick="togglePassword('uploadPDFPassword')" viewBox="0 0 24 24">
+<path d="M12 5c-7 0-11 7-11 7s4 7 11 7 11-7 11-7-4-7-11-7zm0 12a5 5 0 1 1 0-10 5 5 0 0 1 0 10z"/>
+</svg>
+</div>
+
+<button onclick="uploadAndEncryptPDF()">Upload & Encrypt</button>
+<button onclick="downloadEncodedPDF()">Download</button>
+<button onclick="clearUploadPDF()">Clear</button>
+</div>
+
+<!-- Decode PDF -->
+<div class="section">
+<h2>Decode PDF</h2>
+
+<input type="file" id="decodePDFInput" accept="application/pdf">
+
+<div class="password-wrapper">
+<input type="password" id="pdfDecodePassword" placeholder="Password">
+<svg class="eye-icon" onclick="togglePassword('pdfDecodePassword')" viewBox="0 0 24 24">
+<path d="M12 5c-7 0-11 7-11 7s4 7 11 7 11-7 11-7-4-7-11-7zm0 12a5 5 0 1 1 0-10 5 5 0 0 1 0 10z"/>
+</svg>
+</div>
+
+<button onclick="decodeFullPDF()">Decrypt</button>
+<button onclick="clearPDFDecode()">Clear</button>
+<div class="output-box" id="decodedPDFMessage"></div>
+</div>
+
+<canvas id="canvas"></canvas>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<script>
+    let encodedImageDataURL = null;
+let encodedPDFBlob = null;
+
+/* ---------------- PASSWORD TOGGLE ---------------- */
+function togglePassword(id){
+    const input = document.getElementById(id);
+    input.type = input.type === "password" ? "text" : "password";
+}
+
+/* ---------------- IMAGE ENCODE (LSB + AES) ---------------- */
+/* ---------------- IMAGE ENCODE ---------------- */
+
+function encodeImage(){
+
+const file = document.getElementById("encodeImageInput").files[0];
+const message = document.getElementById("encodeMessage").value;
+const password = document.getElementById("encodePassword").value;
+
+if(!file || !message || !password){
+alert("Fill all fields");
+return;
+}
+
+originalImageName = file.name.replace(/\.[^/.]+$/,"");
+
+const reader = new FileReader();
+
+reader.onload = function(e){
+
+const img = new Image();
+
+img.onload = function(){
+
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+
+canvas.width = img.width;
+canvas.height = img.height;
+
+ctx.drawImage(img,0,0);
+
+const encrypted = CryptoJS.AES.encrypt(message,password).toString();
+
+const binary = textToBinary(encrypted + "###END###");
+
+const imageData = ctx.getImageData(0,0,canvas.width,canvas.height);
+const data = imageData.data;
+
+if(binary.length > data.length/4){
+alert("Message too large for this image");
+return;
+}
+
+for(let i=0;i<binary.length;i++){
+
+data[i*4] = (data[i*4] & 254) | parseInt(binary[i]);
+
+}
+
+ctx.putImageData(imageData,0,0);
+
+encodedImageDataURL = canvas.toDataURL("image/png");
+
+alert("Image encoded successfully");
+
+};
+
+img.src = e.target.result;
+
+};
+
+reader.readAsDataURL(file);
+
+}
+
+/* ---------------- IMAGE DECODE ---------------- */
+
+function decodeImage(){
+
+const file = document.getElementById("decodeImageInput").files[0];
+const password = document.getElementById("decodePassword").value;
+
+if(!file || !password){
+alert("Select image and enter password");
+return;
+}
+
+const reader = new FileReader();
+
+reader.onload = function(e){
+
+const img = new Image();
+
+img.onload = function(){
+
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+
+canvas.width = img.width;
+canvas.height = img.height;
+
+ctx.drawImage(img,0,0);
+
+const imageData = ctx.getImageData(0,0,canvas.width,canvas.height);
+const data = imageData.data;
+
+let binary = "";
+
+for(let i=0;i<data.length;i+=4){
+binary += (data[i] & 1);
+}
+
+let extracted = "";
+let temp = "";
+
+for(let i=0;i<binary.length;i+=8){
+
+const byte = binary.substr(i,8);
+
+temp += String.fromCharCode(parseInt(byte,2));
+
+if(temp.includes("###END###")){
+extracted = temp.split("###END###")[0];
+break;
+}
+
+}
+
+try{
+
+const decrypted = CryptoJS.AES.decrypt(extracted,password)
+.toString(CryptoJS.enc.Utf8);
+
+if(!decrypted){
+alert("Wrong password");
+return;
+}
+
+document.getElementById("decodedMessage").innerText = decrypted;
+
+}catch{
+
+alert("Wrong password or corrupted image");
+
+}
+
+};
+
+img.src = e.target.result;
+
+};
+
+reader.readAsDataURL(file);
+
+}
+
+/* DOWNLOAD IMAGE */
+
+function downloadEncodedImage(){
+
+if(!encodedImageDataURL){
+alert("Encode image first");
+return;
+}
+
+const link=document.createElement("a");
+
+link.href=encodedImageDataURL;
+link.download=originalImageName + ".en.png";
+
+link.click();
+
+}
+
+/* ---------------- CLEAR BUTTONS ---------------- */
+
+function clearImageEncode(){
+document.getElementById("encodeImageInput").value="";
+document.getElementById("encodeMessage").value="";
+document.getElementById("encodePassword").value="";
+encodedImageDataURL=null;
+}
+
+function clearImageDecode(){
+document.getElementById("decodeImageInput").value="";
+document.getElementById("decodePassword").value="";
+document.getElementById("decodedMessage").innerText="";
+}
+
+function clearCreatePDF(){
+document.getElementById("pdfText").value="";
+document.getElementById("pdfImageInput").value="";
+document.getElementById("pdfCreatePassword").value="";
+encodedPDFBlob=null;
+}
+
+function clearUploadPDF(){
+document.getElementById("uploadPDFInput").value="";
+document.getElementById("uploadPDFMessage").value="";
+document.getElementById("uploadPDFPassword").value="";
+encodedPDFBlob=null;
+}
+
+function clearPDFDecode(){
+document.getElementById("decodePDFInput").value="";
+document.getElementById("pdfDecodePassword").value="";
+document.getElementById("decodedPDFMessage").innerHTML="";
+}
+
+/* ---------------- CREATE PDF & ENCODE ---------------- */
+async function createAndEncryptPDF(){
+
+const text = document.getElementById("pdfText").value;
+const imageFile = document.getElementById("pdfImageInput").files[0];
+const password = document.getElementById("pdfCreatePassword").value;
+
+if(!text || !password){
+alert("Fill required fields");
+return;
+}
+
+const { jsPDF } = window.jspdf;
+const doc = new jsPDF();
+
+/* add visible content */
+doc.text(text,10,20);
+
+if(imageFile){
+
+const reader = new FileReader();
+
+reader.onload = function(e){
+
+doc.addImage(e.target.result,'JPEG',10,40,100,60);
+finalizeCreatePDF(doc,password);
+
+};
+
+reader.readAsDataURL(imageFile);
+
+}else{
+
+finalizeCreatePDF(doc,password);
+
+}
+
+}
+/* ---------------- UPLOAD PDF & ENCODE ---------------- */
+// Create PDF -> convert full PDF to Base64 -> AES encrypt -> save as Blob
+function uploadAndEncryptPDF(){
+
+const file = document.getElementById("uploadPDFInput").files[0];
+const password = document.getElementById("uploadPDFPassword").value;
+
+if(!file || !password){
+alert("Select PDF and enter password");
+return;
+}
+
+/* store original filename */
+window.uploadPDFName = file.name.replace(/\.[^/.]+$/,"");
+
+const reader = new FileReader();
+
+reader.onload = function(e){
+
+const arrayBuffer = e.target.result;
+const bytes = new Uint8Array(arrayBuffer);
+
+/* convert to base64 */
+let binary="";
+for(let i=0;i<bytes.length;i++){
+binary += String.fromCharCode(bytes[i]);
+}
+
+const base64 = btoa(binary);
+
+/* encrypt */
+const encrypted = CryptoJS.AES.encrypt(base64,password).toString();
+
+/* add markers */
+const hiddenData =
+"\n%%STEGO_START%%\n" +
+encrypted +
+"\n%%STEGO_END%%";
+
+/* attach encrypted block after pdf */
+const combined = binary + hiddenData;
+
+/* create blob */
+encodedPDFBlob = new Blob([combined],{type:"application/pdf"});
+
+alert("PDF encrypted successfully. Now click Download.");
+
+};
+
+reader.readAsArrayBuffer(file);
+
+}
+/* ---------------- DOWNLOAD ENCODED PDF ---------------- */
+function downloadEncodedPDF(){
+
+if(!encodedPDFBlob){
+alert("Please encode a PDF first");
+return;
+}
+
+let name = "document";
+
+if(window.uploadPDFName){
+name = window.uploadPDFName;
+}
+
+const link = document.createElement("a");
+link.href = URL.createObjectURL(encodedPDFBlob);
+link.download = name + ".en.pdf";
+link.click();
+
+}
+
+/* ---------------- DECODE PDF ---------------- */
+function decodeFullPDF(){
+
+const file = document.getElementById("decodePDFInput").files[0];
+const password = document.getElementById("pdfDecodePassword").value;
+
+if(!file || !password){
+alert("Select PDF and enter password");
+return;
+}
+
+const reader = new FileReader();
+
+reader.onload = function(e){
+
+const text = e.target.result;
+
+/* find encrypted block */
+const start = text.indexOf("%%STEGO_START%%");
+const end = text.indexOf("%%STEGO_END%%");
+
+if(start === -1 || end === -1){
+alert("No encrypted data found");
+return;
+}
+
+const encrypted = text.substring(start+15,end).trim();
+
+try{
+
+const decrypted = CryptoJS.AES.decrypt(encrypted,password)
+.toString(CryptoJS.enc.Utf8);
+
+if(!decrypted){
+alert("Wrong password");
+return;
+}
+
+/* base64 → binary */
+const binary = atob(decrypted);
+const bytes = new Uint8Array(binary.length);
+
+for(let i=0;i<binary.length;i++){
+bytes[i] = binary.charCodeAt(i);
+}
+
+const blob = new Blob([bytes],{type:"application/pdf"});
+const url = URL.createObjectURL(blob);
+
+document.getElementById("decodedPDFMessage").innerHTML =
+`<a href="${url}" download="decrypted.pdf">Download Decrypted PDF</a>
+<iframe src="${url}" width="100%" height="400px"></iframe>`;
+
+}catch{
+alert("Wrong password or corrupted PDF");
+}
+
+};
+
+reader.readAsText(file);
+
+}
+/* ---------------- HELPER FUNCTIONS ---------------- */
+function textToBinary(text){
+
+return text.split('').map(char =>
+char.charCodeAt(0).toString(2).padStart(8,'0')
+).join('');
+
+}
+
+function binaryToText(binary){
+
+let text="";
+
+for(let i=0;i<binary.length;i+=8){
+
+const byte=binary.substr(i,8);
+
+text+=String.fromCharCode(parseInt(byte,2));
+
+}
+
+return text;
+
+}
+function finalizeCreatePDF(doc,password){
+
+/* convert PDF to binary */
+const pdfBinary = doc.output("arraybuffer");
+
+const bytes = new Uint8Array(pdfBinary);
+
+let binary="";
+for(let i=0;i<bytes.length;i++){
+binary += String.fromCharCode(bytes[i]);
+}
+
+/* convert to base64 */
+const base64 = btoa(binary);
+
+/* encrypt */
+const encrypted = CryptoJS.AES.encrypt(base64,password).toString();
+
+/* attach encrypted block */
+const hiddenData =
+"\n%%STEGO_START%%\n" +
+encrypted +
+"\n%%STEGO_END%%";
+
+/* combine */
+const combined = binary + hiddenData;
+
+/* create blob */
+encodedPDFBlob = new Blob([combined],{type:"application/pdf"});
+
+alert("PDF created and encrypted successfully");
+
+}
+</script>
+</body>
+</html>
